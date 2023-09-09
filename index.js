@@ -56,6 +56,24 @@ app.get("/get_locations", async (req, res) => {
   }
 });
 
+//code for fetching location between two time intervals
+app.get("/get_locations_between", async (req, res) => {
+  try {
+    // Extract start and end timestamps from query parameters
+    const { startTime, endTime } = req.query;
+
+    // Find locations that fall within the specified time interval
+    const locations = await Location.find({
+      time: { $gte: new Date(startTime), $lte: new Date(endTime) },
+    });
+
+    res.json(locations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

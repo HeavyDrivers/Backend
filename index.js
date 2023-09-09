@@ -19,6 +19,9 @@ db.once("open", function () {
 
 app.use(bodyParser.json());
 
+app.get("/", (req, res) => {
+  res.send("Working");
+});
 // Define an endpoint to save longitude and latitude
 app.post("/save_location", async (req, res) => {
   try {

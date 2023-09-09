@@ -29,6 +29,7 @@ app.post("/save_location", async (req, res) => {
     const { latitude, longitude, time, altitude } = req.body;
 
     // console.log(latitude);
+    console.log(time);
 
     // Create a new Location document
     const location = new Location({ latitude, longitude, time, altitude });

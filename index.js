@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const Location = require("./Schema/location"); // Import the Location model
+const { DateTime } = require("luxon"); //library for timezone conversion
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,14 +58,14 @@ app.get("/get_locations", async (req, res) => {
 });
 
 //code for fetching location between two time intervals
-app.get("/get_locations_between", async (req, res) => {
+app.post("/get_locations_between", async (req, res) => {
   try {
-    // Extract start and end timestamps from query parameters
-    const { startTime, endTime } = req.query;
+    // Extract start and end timestamps from the request body
+    const { startTime, endTime } = req.body;
 
     // Find locations that fall within the specified time interval
     const locations = await Location.find({
-      time: { $gte: new Date(startTime), $lte: new Date(endTime) },
+      time: { $gte: startTime, $lte: endTime },
     });
 
     res.json(locations);

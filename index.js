@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const Location = require("./Schema/location"); // Import the Location model
 const { DateTime } = require("luxon"); //library for timezone conversion
+var cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ db.once("open", function () {
 });
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Working");

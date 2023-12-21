@@ -202,7 +202,7 @@ app.get("/get_speed", async (req, res) => {
   try {
     // Fetch all location documents from the database
     const speed = await Speed.find();
-    const prepspeed = speed.slice(Math.max(speed.length - 10, 0));
+    const prepspeed = speed.slice(Math.max(0, 10));
 
     res.json(prepspeed);
   } catch (error) {

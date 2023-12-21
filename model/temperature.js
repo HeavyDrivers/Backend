@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const temperatureSchema = new mongoose.Schema({
-  value: String,
+  value: Number,
   // You can add other fields if needed
 });
 

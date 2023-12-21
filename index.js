@@ -10,7 +10,7 @@ const EngineRpm = require("./model/engineRpm");
 const FuelLevel = require("./model/fuelLevel");
 const Speed = require("./model/speed");
 const ThrottlePos = require("./model/throttle");
-const Temperature = require("./model/engineCoolant");
+const Temperature = require("./model/temperature");
 
 const app = express();
 const PORT = process.env.PORT || 3000;

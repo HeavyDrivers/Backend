@@ -9,6 +9,7 @@ const EngineCoolant = require("./model/engineCoolant");
 const EngineRpm = require("./model/engineRpm");
 const FuelLevel = require("./model/fuelLevel");
 const Speed = require("./model/speed");
+const ThrottlePos = require("./model/throttle");
 
 const app = express();
 const PORT = process.env.PORT || 5712;
@@ -158,11 +159,24 @@ app.get("/get_engine_rpm", async (req, res) => {
 app.post("/save_throttle_pos", async (req, res) => {
   try {
     // Fetch all engine load documents from the database
-    let data = new FuelLevel({ value: "12.21%" });
+    let data = new ThrottlePos({ value: "12" });
     await data.save();
     // const engineLoads = await EngineLoad.save(data);
 
     res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//fetch throttle pos
+app.get("/get_throttle_pos", async (req, res) => {
+  try {
+    // Fetch all location documents from the database
+    const throttlePos = await ThrottlePos.find();
+
+    res.json(throttlePos);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

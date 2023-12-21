@@ -59,7 +59,7 @@ const csv = require("csvtojson");
 const { MongoClient } = require("mongodb");
 
 const csvFilePath = "exp1_14drivers_14cars_dailyRoutes.csv";
-const columnName = "SPEED"; // Change this to the actual column name
+const columnName = "ENGINE_RPM"; // Change this to the actual column name
 const maxFrequency = 1000; // Maximum frequency limit
 
 // MongoDB connection URL
@@ -94,7 +94,7 @@ async function csvToMongo() {
 
     // Choose your database and collection
     const database = client.db("LocationDb"); // Change this to your database name
-    const collection = database.collection("speeds"); // Change this to your collection name
+    const collection = database.collection("enginecoolants"); // Change this to your collection name
 
     let counter = 0; // Counter for tracking the frequency
 

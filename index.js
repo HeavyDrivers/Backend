@@ -154,6 +154,21 @@ app.get("/get_engine_rpm", async (req, res) => {
   }
 });
 
+//save throttle pos
+app.post("/save_throttle_pos", async (req, res) => {
+  try {
+    // Fetch all engine load documents from the database
+    let data = new FuelLevel({ value: "12.21%" });
+    await data.save();
+    // const engineLoads = await EngineLoad.save(data);
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // save fuel level
 app.post("/save_fuel_load", async (req, res) => {
   try {

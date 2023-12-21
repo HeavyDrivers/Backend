@@ -140,12 +140,12 @@ app.post("/save_temperature", async (req, res) => {
     const { value } = req.body;
 
     // Create a new Location document
-    const location = new Location({
+    const temperature = new Temperature({
       value,
     });
 
     // Save the location data to the database
-    await location.save();
+    await temperature.save();
 
     res.status(201).json({ message: "Location saved successfully" });
   } catch (error) {

@@ -30,6 +30,7 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.send("Working");
 });
+
 // Define an endpoint to save longitude and latitude
 app.post("/save_location", async (req, res) => {
   try {
@@ -201,8 +202,9 @@ app.get("/get_speed", async (req, res) => {
   try {
     // Fetch all location documents from the database
     const speed = await Speed.find();
+    const prepspeed = speed.slice(Math.max(speed.length - 10, 0));
 
-    res.json(speed);
+    res.json(prepspeed);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

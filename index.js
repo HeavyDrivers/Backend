@@ -186,7 +186,7 @@ app.get("/get_fuel_level", async (req, res) => {
 app.post("/save_speed", async (req, res) => {
   try {
     // Fetch all engine load documents from the database
-    let data = new Speed({ value: "12.21%" });
+    let data = new Speed({ value: "1" });
     await data.save();
     // const engineLoads = await EngineLoad.save(data);
 

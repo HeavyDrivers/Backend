@@ -136,12 +136,18 @@ app.get("/get_locations", async (req, res) => {
 //code for saving temperature data
 app.post("/save_temperature", async (req, res) => {
   try {
-    // Fetch all engine load documents from the database
-    let data = new Temperature({ value: "0" });
-    await data.save();
-    // const engineLoads = await EngineLoad.save(data);
+    // Extract latitude and longitude from the request body
+    const { value } = req.body;
 
-    res.json(data);
+    // Create a new Location document
+    const location = new Location({
+      value,
+    });
+
+    // Save the location data to the database
+    await location.save();
+
+    res.status(201).json({ message: "Location saved successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

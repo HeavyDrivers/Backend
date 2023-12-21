@@ -10,9 +10,10 @@ const EngineRpm = require("./model/engineRpm");
 const FuelLevel = require("./model/fuelLevel");
 const Speed = require("./model/speed");
 const ThrottlePos = require("./model/throttle");
+const Temperature = require("./model/engineCoolant");
 
 const app = express();
-const PORT = process.env.PORT || 5712;
+const PORT = process.env.PORT || 3000;
 
 // Connect to your MongoDB database (replace 'mongodb://localhost/mydb' with your MongoDB connection string)
 mongoose.connect(
@@ -34,6 +35,30 @@ app.get("/", (req, res) => {
 
 // Define an endpoint to save longitude and latitude
 app.post("/save_location", async (req, res) => {
+  try {
+    // Extract latitude and longitude from the request body
+    const { latitude, longitude, time } = req.body;
+
+    // console.log(latitude);
+    console.log(time);
+
+    // Create a new Location document
+    const location = new Location({
+      latitude,
+      longitude,
+      time: new Date(time),
+    });
+
+    // Save the location data to the database
+    await location.save();
+
+    res.status(201).json({ message: "Location saved successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/fill_location", async (req, res) => {
   try {
     // Extract latitude and longitude from the request body
     const { latitude, longitude, time } = req.body;
@@ -102,6 +127,35 @@ app.get("/get_locations", async (req, res) => {
     const locations = await Location.find();
 
     res.json(locations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//code for saving temperature data
+app.post("/save_temperature", async (req, res) => {
+  try {
+    // Fetch all engine load documents from the database
+    let data = new Temperature({ value: "0" });
+    await data.save();
+    // const engineLoads = await EngineLoad.save(data);
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//code for fetching temperature data
+
+app.get("/get_temperature", async (req, res) => {
+  try {
+    // Fetch all location documents from the database
+    const temperature = await Temperature.find();
+
+    res.json(temperature);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

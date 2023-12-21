@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
-const engineCoolantSchema = new mongoose.Schema({
+const temperatureSchema = new mongoose.Schema({
   value: String,
   // You can add other fields if needed
 });
 
-const EngineCoolant = mongoose.model("EngineCoolant", engineCoolantSchema);
+const Temperature = mongoose.model("Temperature", temperatureSchema);
 
-module.exports = EngineCoolant;
+module.exports = Temperature;

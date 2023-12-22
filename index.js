@@ -36,6 +36,8 @@ db.once("open", function () {
 app.use(bodyParser.json());
 app.use(cors());
 
+let temperatureValue;
+
 app.get("/", (req, res) => {
   res.send("Working");
 });
@@ -142,6 +144,8 @@ app.post("/fill_location", async (req, res) => {
 //   }
 // });
 
+const MAX_TIME_WITHOUT_DATA = 60 * 1000;
+
 app.post("/get_tempfrom_ubi", async (req, res) => {
   try {
     // Assuming you have the Ubidots variable IDs in the request body
@@ -211,9 +215,13 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
 
       const latestData = [];
 
+      //Additional variables for checking 0 inputs in temp parameter
+      let consecutiveZeroCount = 0;
+      const maxConsecutiveZeroAllowed = 3;
+
       // Iterate through each data point and store relevant information
       for (let i = 0; i < temperatures.length; i++) {
-        const temperatureValue = temperatures[i].value;
+        temperatureValue = temperatures[i].value;
         const latitudeValue = latitudes[i].value;
         const longitudeValue = longitudes[i].value;
         const rpmValue = rpms[i].value;
@@ -238,7 +246,25 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
         });
       }
 
-      res.json(latestData);
+      //Check for zero temp value
+      // Check for zero temperature value
+      if (temperatureValue === 0) {
+        consecutiveZeroCount++;
+
+        // If consecutive zero values exceed the limit, trigger an alert
+        if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
+          // Trigger alert mechanism (send notification, log, etc.)
+          console.log("ALERT: Consecutive zero temperatures detected");
+          res.json({ alert: true }, latestData);
+          return;
+          // You can customize the alert mechanism based on your requirements
+        }
+      } else {
+        // Reset the consecutive zero count when a non-zero value is encountered
+        consecutiveZeroCount = 0;
+      }
+
+      res.json({ alert: false }, latestData);
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({ error: "Invalid Ubidots API response format" });

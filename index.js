@@ -36,8 +36,6 @@ db.once("open", function () {
 app.use(bodyParser.json());
 app.use(cors());
 
-let temperatureValue;
-
 app.get("/", (req, res) => {
   res.send("Working");
 });
@@ -221,7 +219,7 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
 
       // Iterate through each data point and store relevant information
       for (let i = 0; i < temperatures.length; i++) {
-        temperatureValue = temperatures[i].value;
+        const temperatureValue = temperatures[i].value;
         const latitudeValue = latitudes[i].value;
         const longitudeValue = longitudes[i].value;
         const rpmValue = rpms[i].value;
@@ -246,25 +244,7 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
         });
       }
 
-      //Check for zero temp value
-      // Check for zero temperature value
-      if (temperatureValue === 0) {
-        consecutiveZeroCount++;
-
-        // If consecutive zero values exceed the limit, trigger an alert
-        if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
-          // Trigger alert mechanism (send notification, log, etc.)
-          console.log("ALERT: Consecutive zero temperatures detected");
-          res.json({ data: latestData, alert: true });
-          return;
-          // You can customize the alert mechanism based on your requirements
-        }
-      } else {
-        // Reset the consecutive zero count when a non-zero value is encountered
-        consecutiveZeroCount = 0;
-      }
-
-      res.json({ data: latestData, alert: false });
+      res.json(latestData);
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({ error: "Invalid Ubidots API response format" });
@@ -274,36 +254,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-// app.post("/save_tempfrom_ubi", async (req, res) => {
-//   try {
-//     // Assuming you have the Ubidots temperature variable ID in the request body
-//     const ubidotsTempVariableId = "temperatures";
-
-//     // Fetch temperature data from Ubidots
-//     const ubidotsResponse = await fetchDataFromUbidots(ubidotsTempVariableId);
-//     console.log(ubidotsResponse);
-
-//     // Extract temperature values from the Ubidots API response
-//     const temperatures = ubidotsResponse.results;
-
-//     // Iterate through each temperature value and save it to MongoDB
-//     for (const temperatureData of temperatures) {
-//       // Create a new instance of the Temperature model
-//       const data = new Temperature({
-//         value: temperatureData.value,
-//       });
-
-//       // Save the document to MongoDB
-//       await data.save();
-//     }
-
-//     res.json({ message: "Temperature data saved successfully" });
-//   } catch (error) {
-//     console.error(`Error in save_temp_from_ubi: ${error.message}`);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
 
 //Define an endpoints to save sensor data
 app.post("/save_sensor_data", async (req, res) => {
@@ -362,7 +312,7 @@ app.get("/get_engine_loads", async (req, res) => {
 
 async function fetchDataFromUbidots(variableId) {
   // Replace 'your_ubidots_api_token_here' with your actual Ubidots API token
-  const ubidotsApiToken = "BBUS-j56lhVLiFpd9MnZSun7nsnL5buiRXL";
+  const ubidotsApiToken = "BBUS-YnU2MPt4wREZM7PDROprW2xw05A8Zr";
 
   // Your Ubidots API URL
   const apiUrl = `https://industrial.api.ubidots.com/api/v1.6/devices/esp32/${variableId}/values`;

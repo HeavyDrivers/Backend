@@ -127,3 +127,28 @@ csvToMongo();
 
 // // Run the function
 // csvToMongo();
+
+// for (let i = 0; i < temperatures.length; i++) {
+//   const temperatureValue = temperatures[i].value;
+//   const latitudeValue = latitudes[i].value;
+//   const longitudeValue = longitudes[i].value;
+//   const rpmValue = rpms[i].value;
+//   const maxAccelXValue = maxAccelX[i].value;
+//   const maxAccelYValue = maxAccelY[i].value;
+//   const maxAccelZValue = maxAccelZ[i].value;add
+//   const maxGyroXValue = maxGyroX[i].value;
+//   const maxGyroYValue = maxGyroY[i].value;
+
+//   latestData.push({
+//     temperature: temperatureValue,
+//     latitude: latitudeValue,
+//     longitude: longitudeValue,
+//     rpm: rpmValue,
+//     maxAccelX: maxAccelXValue,
+//     maxAccelY: maxAccelYValue,
+//     maxAccelZ: maxAccelZValue,
+//     maxGyroX: maxGyroXValue,
+//     maxGyroY: maxGyroYValue,
+//   });
+
+// Send the response without the 'tempAlert' and 'latAlert' properties if no alerts were detected

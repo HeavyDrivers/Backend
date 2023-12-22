@@ -16,6 +16,10 @@ const Temperature = require("./model/temperature");
 const app = express();
 const PORT = process.env.PORT || 3300;
 
+let temperatureValue;
+let latitudeValue;
+let longitudeValue;
+
 //Ubidots API credential
 const ubidotsToken = "BBUS-YnU2MPt4wREZM7PDROprW2xw05A8Zr";
 const ubidotsLatVariableId = "lattitude";
@@ -90,57 +94,143 @@ app.post("/fill_location", async (req, res) => {
   }
 });
 
-// app.post("/save_latlong_ubi", async (req, res) => {
-//   try {
-//     // Assuming you have the Ubidots temperature variable ID in the request body
+//alert code
+// Iterate through each data point and store relevant information
+app.post("/get_alert_ubi", async (req, res) => {
+  try {
+    // Assuming you have the Ubidots variable IDs in the request body
+    const ubidotsTempVariableId = "temperature";
+    const ubidotsLatitudeVariableId = "latitude";
+    const ubidotsLongitudeVariableId = "longitude";
+    const ubidotsRpmVariableId = "rpm";
+    const ubidotsMaxAccelXVariableId = "maxaccel_x";
+    const ubidotsMaxAccelYVariableId = "maxaccel_y";
+    const ubidotsMaxAccelZVariableId = "maxaccel_z";
+    const ubidotsMaxgyroX = "maxgyro_x_radps";
+    const ubidotsMaxgyroY = "maxgyro_y_radps";
 
-//     // Fetch temperature data from Ubidots
-//     const ubidotsLatResponse = await fetchDataFromUbidots("latitude");
-//     const ubidotsLongResponse = await fetchDataFromUbidots("longitude");
+    // Fetch data from Ubidots
+    const tempResponse = await fetchDataFromUbidots(ubidotsTempVariableId);
+    const latResponse = await fetchDataFromUbidots(ubidotsLatitudeVariableId);
+    const longResponse = await fetchDataFromUbidots(ubidotsLongitudeVariableId);
+    const rpmResponse = await fetchDataFromUbidots(ubidotsRpmVariableId);
+    const maxAccelXResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelXVariableId
+    );
+    const maxAccelYResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelYVariableId
+    );
+    const maxAccelZResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelZVariableId
+    );
+    const maxGyroXResponse = await fetchDataFromUbidots(ubidotsMaxgyroX);
+    const maxGyroYResponse = await fetchDataFromUbidots(ubidotsMaxgyroY);
+    // Check if the 'results' property exists at the root level for each response
+    if (
+      tempResponse &&
+      Array.isArray(tempResponse.data.results) &&
+      latResponse &&
+      Array.isArray(latResponse.data.results) &&
+      longResponse &&
+      Array.isArray(longResponse.data.results) &&
+      rpmResponse &&
+      Array.isArray(rpmResponse.data.results) &&
+      maxAccelXResponse &&
+      Array.isArray(maxAccelXResponse.data.results) &&
+      maxAccelYResponse &&
+      Array.isArray(maxAccelYResponse.data.results) &&
+      maxAccelZResponse &&
+      Array.isArray(maxAccelZResponse.data.results) &&
+      maxGyroXResponse &&
+      Array.isArray(maxAccelXResponse.data.results) &&
+      maxGyroYResponse &&
+      Array.isArray(maxAccelYResponse.data.results)
+    ) {
+      // Extract data values from the respective 'results' arrays
+      const temperatures = tempResponse.data.results;
+      const latitudes = latResponse.data.results;
+      const longitudes = longResponse.data.results;
+      const rpms = rpmResponse.data.results;
+      const maxAccelX = maxAccelXResponse.data.results;
+      const maxAccelY = maxAccelYResponse.data.results;
+      const maxAccelZ = maxAccelZResponse.data.results;
+      const maxGyroX = maxGyroXResponse.data.results;
+      const maxGyroY = maxGyroYResponse.data.results;
 
-//     console.log(ubidotsLatResponse.data.results);
-//     console.log(ubidotsLongResponse.data.results);
+      const latestData = [];
 
-//     // Check if the 'results' property exists at the root level
-//     // Check if the 'results' property exists at the root level for both latitude and longitude
-//     if (
-//       ubidotsLatResponse &&
-//       ubidotsLatResponse.data &&
-//       Array.isArray(ubidotsLatResponse.data.results) &&
-//       ubidotsLongResponse &&
-//       ubidotsLongResponse.data &&
-//       Array.isArray(ubidotsLongResponse.data.results)
-//     ) {
-//       // Extract latitude and longitude values from the 'results' arrays
-//       const latitudes = ubidotsLatResponse.data.results;
-//       const longitudes = ubidotsLongResponse.data.results;
+      // Iterate through each data point and store relevant information
+      for (let i = 0; i < temperatures.length; i++) {
+        temperatureValue = temperatures[i].value;
+        latitudeValue = latitudes[i].value;
+        longitudeValue = longitudes[i].value;
+        const rpmValue = rpms[i].value;
+        const maxAccelXValue = maxAccelX[i].value;
+        const maxAccelYValue = maxAccelY[i].value;
+        const maxAccelZValue = maxAccelZ[i].value;
+        const maxGyroXValue = maxGyroX[i].value;
+        const maxGyroYValue = maxGyroY[i].value;
 
-//       // Assuming both arrays have the same length
-//       for (let i = 0; i < latitudes.length; i++) {
-//         // Access the 'value' properties from the latitude and longitude data
-//         const latitudeValue = latitudes[i].value;
-//         const longitudeValue = longitudes[i].value;
+        latestData.push({
+          temperature: temperatureValue,
+          latitude: latitudeValue,
+          longitude: longitudeValue,
+          rpm: rpmValue,
+          maxAccelX: maxAccelXValue,
+          maxAccelY: maxAccelYValue,
+          maxAccelZ: maxAccelZValue,
+          maxGyroX: maxGyroXValue,
+          maxGyroY: maxGyroYValue,
+        });
+      }
 
-//         // Create a new instance of the Location model (assuming you have a Location model)
-//         const locationData = new Location({
-//           latitude: Number(latitudeValue),
-//           longitude: Number(longitudeValue),
-//           time: new DateTime().toISOstring,
-//         });
-//         // Save the document to MongoDB
-//         await locationData.save();
-//       }
+      let alertList = [];
 
-//       res.json({ message: "Temperature data saved successfully" });
-//     } else {
-//       // Handle the case where 'results' property is not present at the root level
-//       res.status(500).json({ error: "Invalid Ubidots API response format" });
-//     }
-//   } catch (error) {
-//     console.error(`Error in save_temp_from_ubi: ${error.message}`);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
+      // Check for zero temperature value
+      if (temperatureValue === 0) {
+        consecutiveZeroCount++;
+
+        // If consecutive zero values exceed the limit, trigger an alert for temperature
+        if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
+          // Trigger alert mechanism for temperature (send notification, log, etc.)
+          console.log("ALERT: Consecutive zero temperatures detected");
+
+          alertList.push({
+            alertTemp: true,
+          });
+        }
+      } else {
+        // Reset the consecutive zero count when a non-zero value is encountered
+        consecutiveZeroCount = 0;
+
+        alertList.push({
+          alertTemp: false,
+        });
+      }
+
+      // Check for zero latitude value
+      if (latitudeValue === 0 || longitudeValue === 0) {
+        // Trigger alert mechanism for latitude (send notification, log, etc.)
+        console.log("ALERT: Zero latitude or longitude detected ");
+
+        alertList.push({
+          alertGPS: true,
+        });
+      } else {
+        alertList.push({
+          alertGPS: false,
+        });
+      }
+      res.json(alertList);
+    } else {
+      // Handle the case where 'results' property is not present at the root level for any response
+      res.status(500).json({ error: "Invalid Ubidots API response format" });
+    }
+  } catch (error) {
+    console.error(`Error in get_data_from_ubi: ${error.message}`);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.post("/get_tempfrom_ubi", async (req, res) => {
   try {
@@ -328,7 +418,7 @@ app.get("/get_engine_loads", async (req, res) => {
 
 async function fetchDataFromUbidots(variableId) {
   // Replace 'your_ubidots_api_token_here' with your actual Ubidots API token
-  const ubidotsApiToken = "BBUS-j56lhVLiFpd9MnZSun7nsnL5buiRXL";
+  const ubidotsApiToken = "BBUS-dJtKa44Mr4ZXBiHe0fCcK3DJr4RdaU";
 
   // Your Ubidots API URL
   const apiUrl = `https://industrial.api.ubidots.com/api/v1.6/devices/esp32/${variableId}/values`;

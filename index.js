@@ -246,9 +246,7 @@ app.post("/get_data_ubi", async (req, res) => {
             console.log("ALERT: Consecutive zero temperatures detected");
 
             // Include an 'alert' property in the response
-            res.json({
-              latestData,
-            });
+            res.json(latestData);
             return; // Exit the loop and respond immediately after alert
           }
         } else {
@@ -258,9 +256,7 @@ app.post("/get_data_ubi", async (req, res) => {
       }
 
       // Send the response without the 'alert' property if no consecutive zero temperatures were detected
-      res.json({
-        latestData,
-      });
+      res.json(latestData);
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({

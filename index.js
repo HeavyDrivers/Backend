@@ -255,20 +255,16 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
         if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
           // Trigger alert mechanism (send notification, log, etc.)
           console.log("ALERT: Consecutive zero temperatures detected");
-          latestData.push({
-            alert: true,
-          });
+          res.json({ data: latestData, alert: true });
+          return;
           // You can customize the alert mechanism based on your requirements
         }
       } else {
         // Reset the consecutive zero count when a non-zero value is encountered
         consecutiveZeroCount = 0;
-        latestData.push({
-          alert: false,
-        });
       }
 
-      res.json(latestData);
+      res.json({ data: latestData, alert: false });
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({ error: "Invalid Ubidots API response format" });

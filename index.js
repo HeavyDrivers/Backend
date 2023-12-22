@@ -154,7 +154,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
     const ubidotsMaxAccelZVariableId = "maxaccel_z";
     const ubidotsMaxgyroX = "maxgyro_x_radps";
     const ubidotsMaxgyroY = "maxgyro_y_radps";
-    const ubidotsMaxgyroZ = "maxgyro_z_radps";
 
     // Fetch data from Ubidots
     const tempResponse = await fetchDataFromUbidots(ubidotsTempVariableId);
@@ -172,8 +171,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
     );
     const maxGyroXResponse = await fetchDataFromUbidots(ubidotsMaxgyroX);
     const maxGyroYResponse = await fetchDataFromUbidots(ubidotsMaxgyroY);
-    const maxGyroZResponse = await fetchDataFromUbidots(ubidotsMaxgyroZ);
-
     // Check if the 'results' property exists at the root level for each response
     if (
       tempResponse &&
@@ -193,9 +190,7 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
       maxGyroXResponse &&
       Array.isArray(maxAccelXResponse.data.results) &&
       maxGyroYResponse &&
-      Array.isArray(maxAccelYResponse.data.results) &&
-      maxGyroZResponse &&
-      Array.isArray(maxAccelZResponse.data.results)
+      Array.isArray(maxAccelYResponse.data.results)
     ) {
       // Extract data values from the respective 'results' arrays
       const temperatures = tempResponse.data.results;
@@ -207,7 +202,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
       const maxAccelZ = maxAccelZResponse.data.results;
       const maxGyroX = maxGyroXResponse.data.results;
       const maxGyroY = maxGyroYResponse.data.results;
-      const maxGyroZ = maxGyroZResponse.data.results;
 
       const latestData = [];
 
@@ -222,7 +216,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
         const maxAccelZValue = maxAccelZ[i].value;
         const maxGyroXValue = maxGyroX[i].value;
         const maxGyroYValue = maxGyroY[i].value;
-        const maxGyroZValue = maxGyroZ[i].value;
 
         latestData.push({
           temperature: temperatureValue,
@@ -234,7 +227,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
           maxAccelZ: maxAccelZValue,
           maxGyroX: maxGyroXValue,
           maxGyroY: maxGyroYValue,
-          maxGyroZ: maxGyroZValue,
         });
       }
 

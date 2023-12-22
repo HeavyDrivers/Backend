@@ -246,7 +246,7 @@ app.post("/get_data_ubi", async (req, res) => {
             console.log("ALERT: Consecutive zero temperatures detected");
 
             // Include an 'alert' property in the response
-            res.json(latestData);
+            res.json({ data: latestData });
             return; // Exit the loop and respond immediately after alert
           }
         } else {
@@ -256,7 +256,7 @@ app.post("/get_data_ubi", async (req, res) => {
       }
 
       // Send the response without the 'alert' property if no consecutive zero temperatures were detected
-      res.json(latestData);
+      res.json({ data: latestData });
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({
@@ -363,6 +363,8 @@ app.post("/get_alert_ubi", async (req, res) => {
           maxGyroY: maxGyroYValue,
         });
 
+        const alertList = [];
+
         // Check for zero temperature value
         if (temperatureValue === 0) {
           consecutiveZeroCount++;
@@ -371,6 +373,10 @@ app.post("/get_alert_ubi", async (req, res) => {
           if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
             // Trigger alert mechanism (send notification, log, etc.)
             console.log("ALERT: Consecutive zero temperatures detected");
+
+            alertList.push({
+              tempAlert: true,
+            });
 
             // Include an 'alert' property in the response
             res.json({

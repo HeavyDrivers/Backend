@@ -238,7 +238,7 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
         });
       }
 
-      res.json({ data: latestData });
+      res.json(latestData);
     } else {
       // Handle the case where 'results' property is not present at the root level for any response
       res.status(500).json({ error: "Invalid Ubidots API response format" });

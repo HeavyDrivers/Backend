@@ -144,6 +144,139 @@ app.post("/fill_location", async (req, res) => {
 
 const MAX_TIME_WITHOUT_DATA = 60 * 1000;
 
+app.post("/get_data_ubi", async (req, res) => {
+  try {
+    // Assuming you have the Ubidots variable IDs in the request body
+    const ubidotsTempVariableId = "temperature";
+    const ubidotsLatitudeVariableId = "latitude";
+    const ubidotsLongitudeVariableId = "longitude";
+    const ubidotsRpmVariableId = "rpm";
+    const ubidotsMaxAccelXVariableId = "maxaccel_x";
+    const ubidotsMaxAccelYVariableId = "maxaccel_y";
+    const ubidotsMaxAccelZVariableId = "maxaccel_z";
+    const ubidotsMaxgyroX = "maxgyro_x_radps";
+    const ubidotsMaxgyroY = "maxgyro_y_radps";
+
+    // Fetch data from Ubidots
+    const tempResponse = await fetchDataFromUbidots(ubidotsTempVariableId);
+    const latResponse = await fetchDataFromUbidots(ubidotsLatitudeVariableId);
+    const longResponse = await fetchDataFromUbidots(ubidotsLongitudeVariableId);
+    const rpmResponse = await fetchDataFromUbidots(ubidotsRpmVariableId);
+    const maxAccelXResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelXVariableId
+    );
+    const maxAccelYResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelYVariableId
+    );
+    const maxAccelZResponse = await fetchDataFromUbidots(
+      ubidotsMaxAccelZVariableId
+    );
+    const maxGyroXResponse = await fetchDataFromUbidots(ubidotsMaxgyroX);
+    const maxGyroYResponse = await fetchDataFromUbidots(ubidotsMaxgyroY);
+
+    // Check if the 'results' property exists at the root level for each response
+    if (
+      tempResponse &&
+      Array.isArray(tempResponse.data.results) &&
+      latResponse &&
+      Array.isArray(latResponse.data.results) &&
+      longResponse &&
+      Array.isArray(longResponse.data.results) &&
+      rpmResponse &&
+      Array.isArray(rpmResponse.data.results) &&
+      maxAccelXResponse &&
+      Array.isArray(maxAccelXResponse.data.results) &&
+      maxAccelYResponse &&
+      Array.isArray(maxAccelYResponse.data.results) &&
+      maxAccelZResponse &&
+      Array.isArray(maxAccelZResponse.data.results) &&
+      maxGyroXResponse &&
+      Array.isArray(maxAccelXResponse.data.results) &&
+      maxGyroYResponse &&
+      Array.isArray(maxAccelYResponse.data.results)
+    ) {
+      // Extract data values from the respective 'results' arrays
+      const temperatures = tempResponse.data.results;
+      const latitudes = latResponse.data.results;
+      const longitudes = longResponse.data.results;
+      const rpms = rpmResponse.data.results;
+      const maxAccelX = maxAccelXResponse.data.results;
+      const maxAccelY = maxAccelYResponse.data.results;
+      const maxAccelZ = maxAccelZResponse.data.results;
+      const maxGyroX = maxGyroXResponse.data.results;
+      const maxGyroY = maxGyroYResponse.data.results;
+
+      const latestData = [];
+
+      // Additional variables for checking 0 inputs in the temp parameter
+      let consecutiveZeroCount = 0;
+      const maxConsecutiveZeroAllowed = 3;
+
+      // Iterate through each data point and store relevant information
+      for (let i = 0; i < temperatures.length; i++) {
+        const temperatureValue = temperatures[i].value;
+        const latitudeValue = latitudes[i].value;
+        const longitudeValue = longitudes[i].value;
+        const rpmValue = rpms[i].value;
+        const maxAccelXValue = maxAccelX[i].value;
+        const maxAccelYValue = maxAccelY[i].value;
+        const maxAccelZValue = maxAccelZ[i].value;
+        const maxGyroXValue = maxGyroX[i].value;
+        const maxGyroYValue = maxGyroY[i].value;
+
+        latestData.push({
+          temperature: temperatureValue,
+          latitude: latitudeValue,
+          longitude: longitudeValue,
+          rpm: rpmValue,
+          maxAccelX: maxAccelXValue,
+          maxAccelY: maxAccelYValue,
+          maxAccelZ: maxAccelZValue,
+          maxGyroX: maxGyroXValue,
+          maxGyroY: maxGyroYValue,
+        });
+
+        // Check for zero temperature value
+        if (temperatureValue === 0) {
+          consecutiveZeroCount++;
+
+          // If consecutive zero values exceed the limit, trigger an alert
+          if (consecutiveZeroCount > maxConsecutiveZeroAllowed) {
+            // Trigger alert mechanism (send notification, log, etc.)
+            console.log("ALERT: Consecutive zero temperatures detected");
+
+            // Include an 'alert' property in the response
+            res.json({
+              data: latestData,
+              alert: true,
+            });
+            return; // Exit the loop and respond immediately after alert
+          }
+        } else {
+          // Reset the consecutive zero count when a non-zero value is encountered
+          consecutiveZeroCount = 0;
+        }
+      }
+
+      // Send the response without the 'alert' property if no consecutive zero temperatures were detected
+      res.json({
+        data: latestData,
+        alert: false,
+      });
+    } else {
+      // Handle the case where 'results' property is not present at the root level for any response
+      res.status(500).json({
+        error: "Invalid Ubidots API response format",
+      });
+    }
+  } catch (error) {
+    console.error(`Error in get_data_from_ubi: ${error.message}`);
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+});
+
 app.post("/get_tempfrom_ubi", async (req, res) => {
   try {
     // Assuming you have the Ubidots variable IDs in the request body
@@ -200,7 +333,7 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
       Array.isArray(maxAccelZResponse.data.results)
     ) {
       // Extract data values from the respective 'results' arrays
-      const temperatures = tempResponse.data.results;
+      temperatures = tempResponse.data.results;
       const latitudes = latResponse.data.results;
       const longitudes = longResponse.data.results;
       const rpms = rpmResponse.data.results;
@@ -240,7 +373,6 @@ app.post("/get_tempfrom_ubi", async (req, res) => {
           maxAccelZ: maxAccelZValue,
           maxGyroX: maxGyroXValue,
           maxGyroY: maxGyroYValue,
-          maxGyroZ: maxGyroZValue,
         });
       }
 
@@ -312,7 +444,7 @@ app.get("/get_engine_loads", async (req, res) => {
 
 async function fetchDataFromUbidots(variableId) {
   // Replace 'your_ubidots_api_token_here' with your actual Ubidots API token
-  const ubidotsApiToken = "BBUS-YnU2MPt4wREZM7PDROprW2xw05A8Zr";
+  const ubidotsApiToken = "BBUS-j56lhVLiFpd9MnZSun7nsnL5buiRXL";
 
   // Your Ubidots API URL
   const apiUrl = `https://industrial.api.ubidots.com/api/v1.6/devices/esp32/${variableId}/values`;

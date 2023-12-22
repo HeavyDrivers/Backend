@@ -336,7 +336,7 @@ app.get("/get_engine_loads", async (req, res) => {
 
 async function fetchDataFromUbidots(variableId) {
   // Replace 'your_ubidots_api_token_here' with your actual Ubidots API token
-  const ubidotsApiToken = "BBUS-YnU2MPt4wREZM7PDROprW2xw05A8Zr";
+  const ubidotsApiToken = "BBUS-j56lhVLiFpd9MnZSun7nsnL5buiRXL";
 
   // Your Ubidots API URL
   const apiUrl = `https://industrial.api.ubidots.com/api/v1.6/devices/esp32/${variableId}/values`;
